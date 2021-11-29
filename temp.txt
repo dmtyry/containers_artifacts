@@ -1,0 +1,31 @@
+sudo docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Passw0rd12345" \
+   -p 1433:1433 --name sql1 -h sql1 \
+   -d \
+   mcr.microsoft.com/mssql/server:2017-latest
+
+
+docker run -d -p 8080:80 --name poi --network huminsnw -e "SQL_PASSWORD=Passw0rd12345" -e "SQL_USER=SA" -e "SQL_SERVER=sql1" -e "ASPNETCORE_ENVIRONMENT=Local" tripinsights/poi:1.0
+
+/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Passw0rd12345"
+
+docker run --network huminsnw -e SQLFQDN=sql1 -e SQLUSER=SA -e SQLPASS=Passw0rd12345 -e SQLDB=mydrivingDB registryjov6515.azurecr.io/dataload:1.0
+
+docker run -d -p 8084:80 --name tripviewer --network huminsnw -e "USERPROFILE_API_ENDPOINT=http://userprofile" -e "TRIPS_API_ENDPOINT=http://trips" tripinsights/tripviewer:1.0
+
+
+registryjov6515.azurecr.io
+
+docker tag tripinsights/userprofile:1.0 registryjov6515.azurecr.io/tripinsights/userprofile:1.0
+
+docker tag tripinsights/user-java:1.0 registryjov6515.azurecr.io/tripinsights/user-java:1.0
+
+docker tag tripinsights/trips:1.0 registryjov6515.azurecr.io/tripinsights/trips:1.0
+
+docker tag tripinsights/tripviewer:1.0 registryjov6515.azurecr.io/tripinsights/tripviewer:1.0
+
+docker tag tripinsights/poi:1.0 registryjov6515.azurecr.io/tripinsights/poi:1.0
+
+
+az aks get-credentials -g teamResources -n dmtyryohaks
+az aks create -n dmtyryohaks -g teamResources --enable-managed-identity --node-count 2 
+
